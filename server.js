@@ -13,12 +13,21 @@ try {
   // External npm packages not yet installed
 }
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || process.argv[2] || 5000;
 
 if (express) {
   const app = express();
   if (cors) app.use(cors());
   app.use(express.json());
+  // Simple request logger to help diagnose routing issues
+  app.use((req, res, next) => {
+    try {
+      console.log('REQ', req.method, req.path);
+    } catch (e) {
+      console.log('REQ LOG ERR');
+    }
+    next();
+  });
 
   app.get('/', (req, res) => {
     res.json({ message: 'Server is running cleanly', status: 'OK' });
@@ -60,6 +69,13 @@ if (express) {
 
     const productRoutes = require('./server/routes/productRoutes');
     app.use('/api/products', productRoutes);
+
+    const authRoutes = require('./server/routes/authRoutes');
+    console.log('authRoutes type:', typeof authRoutes, 'keys:', Object.keys(authRoutes || {}));
+    app.use('/api/auth', authRoutes);
+
+    // Inline debug route to verify mounting behavior
+    app.get('/__inline_test', (req, res) => res.json({ ok: true, time: Date.now() }));
   } catch (err) {
     console.error('Routes module loading error:', err && err.stack ? err.stack : err);
   }
@@ -83,6 +99,20 @@ if (express) {
       });
     }
     console.log('Mounted routes:', routes);
+    try {
+      if (app && app._router && app._router.stack) {
+        console.log('Router stack length:', app._router.stack.length);
+        app._router.stack.forEach((l, i) => {
+          try {
+            console.log(i, 'name=', l.name, 'route=', l && l.route && l.route.path, 'regexp=', l && l.regexp && l.regexp.toString());
+          } catch (e) {
+            console.log(i, 'layer inspect error');
+          }
+        });
+      }
+    } catch (e) {
+      console.log('Router stack inspect failed:', e && e.message);
+    }
     try {
       const layerNames = app._router.stack.map((l) => ({ name: l.name, keys: Object.keys(l) }));
       console.log('Router stack layers:', JSON.stringify(layerNames));

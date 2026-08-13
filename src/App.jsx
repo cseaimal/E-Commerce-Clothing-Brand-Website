@@ -5,10 +5,13 @@ import ProductCatalog from './pages/ProductCatalog';
 import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import Cart from './pages/Cart';
+import Register from './pages/Register';
+import Login from './pages/Login';
 import OrderConfirmation from './pages/OrderConfirmation';
 import OrderHistory from './pages/OrderHistory';
 import Wholesale from './pages/Wholesale';
 import AdminInquiries from './pages/AdminInquiries';
+import AdminRoute from './components/AdminRoute';
 import './styles/Checkout.css';
 
 function MainApp() {
@@ -56,6 +59,16 @@ function MainApp() {
           <button className={`nav-btn ${route === '/cart' ? 'active' : ''}`} onClick={() => navigate('/cart')}>
             🛒 Cart ({cartCount})
           </button>
+          {!user && (
+            <>
+              <button className={`nav-btn ${route === '/login' ? 'active' : ''}`} onClick={() => navigate('/login')}>
+                🔐 Login
+              </button>
+              <button className={`nav-btn ${route === '/register' ? 'active' : ''}`} onClick={() => navigate('/register')}>
+                📝 Register
+              </button>
+            </>
+          )}
           <div className="user-badge">
             👤 {user ? `${user.name} (${user.role.toUpperCase()})` : 'Guest'}
           </div>
@@ -69,7 +82,9 @@ function MainApp() {
         ) : isProductDetail ? (
           <ProductDetail productId={productIdFromPath} navigate={navigate} />
         ) : route === '/admin/inquiries' ? (
-          <AdminInquiries navigate={navigate} />
+          <AdminRoute navigate={navigate}>
+            <AdminInquiries navigate={navigate} />
+          </AdminRoute>
         ) : route === '/wholesale' ? (
           <Wholesale navigate={navigate} />
         ) : route === '/orders' ? (
@@ -78,6 +93,10 @@ function MainApp() {
           <Checkout navigate={navigate} />
         ) : route === '/cart' ? (
           <Cart navigate={navigate} />
+        ) : route === '/login' ? (
+          <Login navigate={navigate} />
+        ) : route === '/register' ? (
+          <Register navigate={navigate} />
         ) : (
           <ProductCatalog navigate={navigate} />
         )}

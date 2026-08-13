@@ -1,0 +1,4 @@
+body{font-family:Inter,system-ui,Arial;margin:0;padding:0;background:#fff;color:#111}
+input{display:block;padding:8px;margin:6px 0;width:100%;box-sizing:border-box}
+label{font-weight:600}
+button{padding:8px 12px;margin-top:8px}

@@ -1,70 +1,52 @@
-let jwt;
-try {
-  jwt = require('jsonwebtoken');
-} catch (e) {
-  // Optional dependency fallback if jsonwebtoken npm package is not installed
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+
+// Protect middleware - verifies Bearer token and attaches user to req.user
+async function protect(req, res, next) {
+  const auth = req.headers.authorization || req.headers.Authorization || '';
+  if (!auth || !auth.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Not authorized, token missing' });
+  }
+
+  const token = auth.split(' ')[1];
+  const secret = process.env.JWT_SECRET || 'dev_secret';
+  let payload;
+  try {
+    payload = jwt.verify(token, secret);
+  } catch (err) {
+    return res.status(401).json({ message: 'Not authorized, token invalid' });
+  }
+
+  if (!payload || !payload.id) return res.status(401).json({ message: 'Not authorized' });
+
+  try {
+    const user = await User.findById(payload.id).select('-password');
+    if (!user) return res.status(401).json({ message: 'Not authorized' });
+    req.user = user;
+    return next();
+  } catch (err) {
+    return res.status(401).json({ message: 'Not authorized' });
+  }
 }
 
-const mongoose = require('mongoose');
+// isAdmin middleware - requires req.user.role === 'admin'
+function isAdmin(req, res, next) {
+  if (!req.user) return res.status(401).json({ message: 'Not authorized' });
+  if (req.user.role !== 'admin') return res.status(403).json({ message: 'Forbidden: admin only' });
+  return next();
+}
 
-// Helper to guarantee valid Mongoose ObjectId
-const formatUserId = (id) => {
-  if (!id) return new mongoose.Types.ObjectId();
-  if (mongoose.Types.ObjectId.isValid(id) && String(new mongoose.Types.ObjectId(id)) === String(id)) {
-    return new mongoose.Types.ObjectId(id);
-  }
-  // Convert arbitrary string (e.g. 'user_123') into a valid 24-char hex ObjectId
-  const hex = Buffer.from(String(id)).toString('hex').padEnd(24, '0').substring(0, 24);
-  return new mongoose.Types.ObjectId(hex);
+// isWholesale middleware - allows wholesale or admin
+function isWholesale(req, res, next) {
+  if (!req.user) return res.status(401).json({ message: 'Not authorized' });
+  if (req.user.role === 'wholesale' || req.user.role === 'admin') return next();
+  return res.status(403).json({ message: 'Forbidden: wholesale access required' });
+}
+
+module.exports = {
+  protect,
+  isAdmin,
+  isWholesale,
+  // compatibility alias used elsewhere in the codebase
+  admin: isAdmin,
 };
-
-// Protect middleware to authenticate requests
-const protect = async (req, res, next) => {
-  let token;
-
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    try {
-      token = req.headers.authorization.split(' ')[1];
-      
-      if (jwt && process.env.JWT_SECRET) {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const validId = formatUserId(decoded.id || decoded._id);
-        req.user = { _id: validId, id: validId, isAdmin: decoded.isAdmin || false };
-      } else {
-        const validId = formatUserId(token);
-        req.user = { _id: validId, id: validId, isAdmin: req.headers['x-is-admin'] === 'true' };
-      }
-      return next();
-    } catch (error) {
-      return res.status(401).json({ message: 'Not authorized, token failed' });
-    }
-  }
-
-  if (req.user) {
-    req.user._id = formatUserId(req.user._id || req.user.id);
-    req.user.id = req.user._id;
-    return next();
-  }
-
-  if (req.headers['x-user-id']) {
-    const validId = formatUserId(req.headers['x-user-id']);
-    req.user = {
-      _id: validId,
-      id: validId,
-      isAdmin: req.headers['x-is-admin'] === 'true',
-    };
-    return next();
-  }
-
-  return res.status(401).json({ message: 'Not authorized, no token' });
-};
-
-// Admin middleware to restrict routes to admin users only
-const admin = (req, res, next) => {
-  if (req.user && req.user.isAdmin) {
-    return next();
-  }
-  return res.status(403).json({ message: 'Not authorized as an admin' });
-};
-
-module.exports = { protect, admin };
