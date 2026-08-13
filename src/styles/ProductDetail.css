@@ -1,0 +1,27 @@
+.pd-container { display:flex; gap:24px; padding:16px; max-width:1100px; margin:0 auto; }
+.pd-gallery { width:50%; }
+.pd-main img { width:100%; height:auto; border-radius:6px; object-fit:cover }
+.pd-thumbs { display:flex; gap:8px; margin-top:8px }
+.pd-thumb-btn { border:1px solid #eee; padding:0; width:64px; height:64px; display:inline-block; overflow:hidden; background:white; }
+.pd-thumb-btn img { width:100%; height:100%; object-fit:cover }
+.pd-thumb-btn.active { box-shadow:0 0 0 2px #007bff }
+.pd-details { width:50%; }
+.pd-name { margin:0 0 8px 0 }
+.pd-price { font-size:20px; font-weight:700; margin-bottom:8px }
+.pd-desc { color:#444; margin-bottom:12px }
+.pd-variants { display:flex; gap:12px; align-items:center; margin-bottom:12px }
+.pd-variant label { display:block; font-size:12px; margin-bottom:6px }
+.pd-variant select { padding:8px; border:1px solid #ddd; border-radius:4px }
+.pd-stock { color:#666 }
+.pd-actions { display:flex; gap:12px; align-items:center }
+.pd-qty input { width:80px; padding:8px; border:1px solid #ddd; border-radius:4px }
+.pd-add { background:#28a745; color:white; padding:10px 14px; border:none; border-radius:6px; cursor:pointer }
+.pd-add[disabled] { background:#ccc; cursor:not-allowed }
+.pd-empty { padding:32px; text-align:center; color:#666 }
+.pd-spinner { width:48px; height:48px; border-radius:50%; border:5px solid #eee; border-top-color:#007bff; animation: pd-spin 1s linear infinite; margin:32px auto; }
+@keyframes pd-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 800px) {
+  .pd-container { flex-direction:column }
+  .pd-gallery, .pd-details { width:100% }
+}

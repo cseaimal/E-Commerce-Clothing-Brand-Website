@@ -1,0 +1,99 @@
+{
+  "info": {
+    "name": "Aljannat API Tests (Orders & Bulk Inquiries)",
+    "description": "Postman collection to test Order management and Bulk Inquiry endpoints (creation, admin approval, rejection, and user role update to wholesale).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000" },
+    { "key": "user1Token", "value": "user_64f1a2b3c4d5e6f7a8b9c0d1" },
+    { "key": "user2Token", "value": "user_75a2b3c4d5e6f7a8b9c0d2e3" },
+    { "key": "adminToken", "value": "admin_86b3c4d5e6f7a8b9c0d3e4f5" },
+    { "key": "inquiryId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Submit Bulk Inquiry (Public) - POST /api/bulk-inquiries",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"businessName\": \"Aljannat Traders & Retailers\",\n  \"contactPerson\": \"Aimal Khan\",\n  \"phone\": \"03001234567\",\n  \"city\": \"Lahore\",\n  \"userEmail\": \"aimal@aljannat.com\",\n  \"requestedItems\": [\n    {\n      \"product\": \"64f1a2b3c4d5e6f7a8b9c0a1\",\n      \"qty\": 50\n    }\n  ]\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/bulk-inquiries", "host": ["{{baseUrl}}"], "path": ["api", "bulk-inquiries"] }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Get All Bulk Inquiries (Admin) - GET /api/bulk-inquiries",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "x-user-id", "value": "admin_86b3c4d5e6f7a8b9c0d3e4f5" },
+          { "key": "x-is-admin", "value": "true" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/bulk-inquiries", "host": ["{{baseUrl}}"], "path": ["api", "bulk-inquiries"] }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Approve Bulk Inquiry & Update Role (Admin) - PUT /api/bulk-inquiries/:id/approve",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "x-user-id", "value": "admin_86b3c4d5e6f7a8b9c0d3e4f5" },
+          { "key": "x-is-admin", "value": "true" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/bulk-inquiries/:id/approve", "host": ["{{baseUrl}}"], "path": ["api", "bulk-inquiries", ":id", "approve"] }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Reject Bulk Inquiry (Admin) - PUT /api/bulk-inquiries/:id/reject",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "x-user-id", "value": "admin_86b3c4d5e6f7a8b9c0d3e4f5" },
+          { "key": "x-is-admin", "value": "true" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/bulk-inquiries/:id/reject", "host": ["{{baseUrl}}"], "path": ["api", "bulk-inquiries", ":id", "reject"] }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Create Order (User 1) - POST /api/orders",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{user1Token}}" },
+          { "key": "x-user-id", "value": "user_64f1a2b3c4d5e6f7a8b9c0d1" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"items\": [\n    {\n      \"product\": \"64f1a2b3c4d5e6f7a8b9c0a1\",\n      \"variant\": { \"size\": \"L\", \"color\": \"Black\" },\n      \"qty\": 2,\n      \"price\": 1500\n    }\n  ],\n  \"shippingAddress\": {\n    \"street\": \"123 Main Street\",\n    \"city\": \"Lahore\",\n    \"phone\": \"03001234567\"\n  },\n  \"paymentMethod\": \"COD\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/orders", "host": ["{{baseUrl}}"], "path": ["api", "orders"] }
+      },
+      "response": []
+    },
+    {
+      "name": "6. Get My Orders (User 1) - GET /api/orders/my",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{user1Token}}" },
+          { "key": "x-user-id", "value": "user_64f1a2b3c4d5e6f7a8b9c0d1" }
+        ],
+        "url": { "raw": "{{baseUrl}}/api/orders/my", "host": ["{{baseUrl}}"], "path": ["api", "orders", "my"] }
+      },
+      "response": []
+    }
+  ]
+}

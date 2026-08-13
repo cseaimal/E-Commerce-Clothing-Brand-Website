@@ -1,0 +1,24 @@
+[
+  {
+    "product": "p1",
+    "name": "Embroidered Lawn Suit",
+    "variant": {
+      "size": "M",
+      "color": "Blue"
+    },
+    "qty": 3,
+    "price": 4500,
+    "image": "https://placehold.co/400x500"
+  },
+  {
+    "product": "p2",
+    "name": "Silk Kurta",
+    "variant": {
+      "size": "L",
+      "color": "Red"
+    },
+    "qty": 1,
+    "price": 3200,
+    "image": "https://placehold.co/400x500"
+  }
+]
